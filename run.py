@@ -1,8 +1,11 @@
 import json
 import datetime
+
 from database import Database
 
+
 class SarifParser:
+
     def __init__(self, file_path):
         self.file_path = file_path
         self.sarif_data = self.read_sarif_file()
@@ -31,7 +34,7 @@ class SarifParser:
         return {
             'ruleId': issue.get('ruleId'),
             'message': issue.get('message'),
-            'locations': issue.get('locations')
+            'locations': issue.get('locations'),
         }
 
     def save_vulnerabilities(self, db):
@@ -42,14 +45,18 @@ class SarifParser:
                 for location in issue_details['locations']:
                     physical_location = location.get('physicalLocation')
                     if physical_location:
-                        artifact_location = physical_location.get('artifactLocation')
+                        artifact_location = physical_location.get(
+                            'artifactLocation')
                         if artifact_location:
                             uri = artifact_location.get('uri')
                             if uri:
                                 current_time = datetime.datetime.now()
                                 tool = self.get_tool_info()
-                                db.insert_data('vulnerabilities', (issue_details['ruleId'], issue_details['message']['text'], uri, current_time, tool.get('name')))
-
+                                db.insert_data(
+                                    'vulnerabilities',
+                                    (issue_details['ruleId'],
+                                     issue_details['message']['text'], uri,
+                                     current_time, tool.get('name')))
 
     def print_issues(self):
         issues = self.get_issues()
@@ -60,13 +67,23 @@ class SarifParser:
                 print(f"Message: {issue_details['message']['text']}")
                 print("Locations:")
                 for location in issue_details['locations']:
+                    print(
+                        f"Snippet: {location.get('physicalLocation').get('region').get('snippet').get('text')}"
+                    )
+                    print(
+                        f"startLine: {location.get('physicalLocation').get('region').get('startLine')}"
+                    )
+                    print(
+                        f"endLine: {location.get('physicalLocation').get('region').get('endLine')}"
+                    )
                     physical_location = location.get('physicalLocation')
                     if physical_location:
-                        artifact_location = physical_location.get('artifactLocation')
+                        artifact_location = physical_location.get(
+                            'artifactLocation')
                         if artifact_location:
                             uri = artifact_location.get('uri')
                             if uri:
-                                print(f"  - {uri} \n {40 * '='}")
+                                print(f"  - {uri} \n {40 * '='}\n\n")
                             else:
                                 print("  URI not available")
                         else:
@@ -78,11 +95,14 @@ class SarifParser:
             print("No issues found.")
 
 
-if __name__ == "__main__":
+def start_parse():
     db = Database('vulnerabilities.db')
-    db.create_table('vulnerabilities', ['rule_id TEXT', 'message TEXT', 'uri TEXT', 'current_time TEXT', 'tool TEXT'])
+    db.create_table('vulnerabilities', [
+        'rule_id TEXT', 'message TEXT', 'uri TEXT', 'current_time TEXT',
+        'tool TEXT'
+    ])
     db.add_column('vulnerabilities', 'tool', 'TEXT')
-    parser = SarifParser('horusec.sarif')
+    parser = SarifParser('scan.sarif')
     parser.save_vulnerabilities(db)
     parser.print_issues()
     db.close_connection()
