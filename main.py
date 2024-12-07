@@ -1,9 +1,10 @@
 import sys
-
-from sarif import start_parse
+from pathlib import Path
+from src.sarif import SarifParser
 
 
 def main():
+    start_parse = SarifParser(file_path=Path('scan.sarif'))
     start_parse()
 
 

@@ -6,11 +6,13 @@ class Database:
         self.cursor = self.conn.cursor()
 
     def create_table(self, table_name, columns):
+        """Создание таблицы"""
         query = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)})"
         self.cursor.execute(query)
         self.conn.commit()
 
     def insert_data(self, table_name, data):
+        """Добавление данных"""
         query = f"INSERT INTO {table_name} VALUES ({', '.join(['?' for _ in data])})"
         self.cursor.execute(query, data)
         self.conn.commit()
