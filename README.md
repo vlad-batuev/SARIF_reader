@@ -1,8 +1,7 @@
 # SARIF READER
 
-'
-python main.py
-'
+```python main.py```
+
 
 
 - This script reads the SERIF file version 2.1.0
